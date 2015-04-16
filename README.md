@@ -47,7 +47,7 @@
 #### 五分钟快速安装一个ROCPHP框架
 1. 要求：PHP >= 5.3 ，如使用了数据库，则需要开启`pdo_mysql`扩展
 
-2. 下载最新版本的 [ROCPHP](http://github.com/ "ROCPHP" target="_blank"), 解压放到你的web目录中
+2. 下载最新版本的ROCPHP [Coding站下载](https://coding.net/u/rocboss/p/ROCPHP/git "ROCPHP源码Coding.net下载") [OSC站下载](http://git.oschina.net/rocboss/rocphp "ROCPHP源码Oschina.net下载") [Github站下载](https://github.com/rocboss/rocphp "ROCPHP源码Github.com下载"), 解压放到你的web目录中
 
 3. 配置你服务器的伪静态
 
