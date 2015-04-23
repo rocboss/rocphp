@@ -25,9 +25,11 @@ foreach ($router_config as $path => $rule)
     {
         require_once 'app/controller/'.$rule[0].'.php';
 
+        $ruleName = $rule[0];
+
         $rule[0] = new $rule[0]($app, $db_config);
 
-        $app->set('loadRuleClass', array_merge($app->get('loadRuleClass'), array($rule[0])));
+        $app->set('loadRuleClass', array_merge($app->get('loadRuleClass'), array($ruleName)));
     }
 
     $app->route($path, $rule);
