@@ -29,7 +29,11 @@ foreach ($router_config as $path => $rule)
 
         $rule[0] = new $rule[0]($app, $db_config);
 
-        array_push($app->get('loadRuleClass'), $ruleName);
+        $tmpRule = $app->get('loadRuleClass');
+
+        array_push($tmpRule, $ruleName);
+
+        $app->set('loadRuleClass', $tmpRule);
         
         $app->set('loadRuleClass', $app->get('loadRuleClass'));
     }
