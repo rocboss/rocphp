@@ -34,8 +34,6 @@ foreach ($router_config as $path => $rule)
         array_push($tmpRule, $ruleName);
 
         $app->set('loadRuleClass', $tmpRule);
-        
-        $app->set('loadRuleClass', $app->get('loadRuleClass'));
     }
 
     $app->route($path, $rule);
