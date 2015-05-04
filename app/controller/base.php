@@ -26,12 +26,15 @@ class base
         # 模板缓存时间
         $this->app->view()->cache_time = 0;
 
+        # 赋值tpl变量
+        $this->app->set('tpl', ($this->app->get('root') == '/' ? $this->app->get('root') : $this->app->get('root').'/') .$this->app->view()->tpl_dir);
+
         # 模板赋值app所在根目录
         $this->app->view()->assign('root', $this->app->get('root'));
 
         # 模板赋值app模板所在目录
-        $this->app->view()->assign('tpl', ($this->app->get('root') == '/' ? $this->app->get('root') : $this->app->get('root').'/') .$this->app->view()->tpl_dir);
-
+        $this->app->view()->assign('tpl', $this->app->get('tpl'));
+        
         # 模板赋值app模板css所在目录
         $this->app->view()->assign('css', $this->app->get('tpl').'assets/css/');
 
