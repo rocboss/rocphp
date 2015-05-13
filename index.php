@@ -23,18 +23,16 @@ foreach ($router_config as $path => $rule)
 {       
     if (is_array($rule) && isset($rule[0]) && !in_array($rule[0], $app->get('loadRuleClass')))
     {
-        require_once 'app/controller/'.$rule[0].'.php';
-
-        $ruleName = $rule[0];
-
-        $rule[0] = new $rule[0]($app, $db_config);
+        require 'app/controller/'.$rule[0].'.php';
 
         $tmpRule = $app->get('loadRuleClass');
 
-        array_push($tmpRule, $ruleName);
+        array_push($tmpRule, $rule[0]);
 
         $app->set('loadRuleClass', $tmpRule);
     }
+
+    $rule[0] = new $rule[0]($app, $db_config);
 
     $app->route($path, $rule);
 }
