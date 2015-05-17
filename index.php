@@ -13,6 +13,9 @@ require 'app/config/router_config.php';
 $app = ROC::app();
 
 # 存储已加载类
+$app->set('loadRule', array());
+
+# 存储已加载类
 $app->set('loadRuleClass', array());
 
 # 加载app基础类
@@ -21,23 +24,39 @@ require_once 'app/controller/base.php';
 # 路由分发
 foreach ($router_config as $path => $rule)
 {       
-    if (is_array($rule) && isset($rule[0]) && !in_array($rule[0], $app->get('loadRuleClass')))
+    if (is_array($rule) && isset($rule[0]))
     {
-        require 'app/controller/'.$rule[0].'.php';
+        $tmpRule = $app->get('loadRule');
 
-        $tmpRule = $app->get('loadRuleClass');
+        $tmpRuleClass = $app->get('loadRuleClass');
 
-        array_push($tmpRule, $rule[0]);
+        if (!in_array($rule[0], $tmpRule))
+        {
+            require 'app/controller/'.$rule[0].'.php';
 
-        $app->set('loadRuleClass', $tmpRule);
+            array_push($tmpRule, $rule[0]);
+
+            $tmpRuleClass = array_merge($tmpRuleClass, array($rule[0] => new $rule[0]($app, $db_config)));
+
+            $rule[0] = $tmpRuleClass[$rule[0]];
+        }
+        else
+        {
+            $rule[0] = $tmpRuleClass[$rule[0]];
+        }
+
+        $app->set('loadRule', $tmpRule);
+
+        $app->set('loadRuleClass', $tmpRuleClass);
     }
-
-    $rule[0] = new $rule[0]($app, $db_config);
 
     $app->route($path, $rule);
 }
 
-# 清除变量
+# 清除已加载的类名变量
+$app->clear('loadRule');
+
+# 清除已加载的类变量
 $app->clear('loadRuleClass');
 
 # 启动框架
