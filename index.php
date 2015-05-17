@@ -12,10 +12,10 @@ require 'app/config/router_config.php';
 # 实例化ROC框架，动态调用
 $app = ROC::app();
 
-# 存储已加载类
+# 存储已加载类名称
 $app->set('loadRule', array());
 
-# 存储已加载类
+# 存储已加载类的实例
 $app->set('loadRuleClass', array());
 
 # 加载app基础类
