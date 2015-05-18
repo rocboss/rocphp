@@ -1,5 +1,5 @@
 <?php
-
+namespace app\controller;
 class base
 {
     protected $app;

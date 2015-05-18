@@ -18,9 +18,6 @@ $app->set('loadRule', array());
 # 存储已加载类的实例
 $app->set('loadRuleClass', array());
 
-# 加载app基础类
-require_once 'app/controller/base.php';
-
 # 路由分发
 foreach ($router_config as $path => $rule)
 {       
@@ -32,11 +29,11 @@ foreach ($router_config as $path => $rule)
 
         if (!in_array($rule[0], $tmpRule))
         {
-            require 'app/controller/'.$rule[0].'.php';
-
             array_push($tmpRule, $rule[0]);
 
-            $tmpRuleClass = array_merge($tmpRuleClass, array($rule[0] => new $rule[0]($app, $db_config)));
+            $class = '\app\controller\\'.$rule[0];
+
+            $tmpRuleClass = array_merge($tmpRuleClass, array($rule[0] => new $class($app, $db_config)));
 
             $rule[0] = $tmpRuleClass[$rule[0]];
         }
