@@ -16,6 +16,8 @@ class Router
     
     public function clear()
     {
+        $this->index = 0;
+        
         $this->routes = array();
     }
     

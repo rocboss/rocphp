@@ -77,6 +77,8 @@ class Engine
             'start',
             'stop',
             'route',
+            'clearRoutes',
+            'getNowRoute',
             'halt',
             'error',
             'notFound',
@@ -218,7 +220,22 @@ class Engine
     {
         $this->loader->addDirectory($dir);
     }
+
+    public function _clearRoutes()
+    {
+
+        $this->router()->clear();
+    }
     
+    public function _getNowRoute()
+    {
+        $request    = $this->request();
+
+        $router     = $this->router();
+
+        return $router->route($request)->callback;
+    }
+
     # 启动这个框架
     public function _start()
     {
