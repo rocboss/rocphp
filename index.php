@@ -18,10 +18,15 @@ foreach ($router_config as $path => $rule)
     $app->route($path, $rule);
 }
 
+# 是否匹配到路由规则
+$isExistRule = true;
+
 # 路由分发（实例化Class）
 foreach ($router_config as $path => $rule)
 {
-    if ($rule == $app->getNowRoute())
+    $nowRoute = $app->getNowRoute();
+
+    if (is_array($nowRoute) && $rule == $nowRoute)
     {
         # 清除之前注册的路由
         $app->clearRoutes();
@@ -34,8 +39,17 @@ foreach ($router_config as $path => $rule)
         # 只注册当前URL对应的路由
         $app->route($path, $rule);
 
+        $isExistRule = true;
+
         break;
     }
+
+    $isExistRule = false;
+}
+
+if (!$isExistRule)
+{
+    $app->clearRoutes();
 }
 
 # 启动框架
