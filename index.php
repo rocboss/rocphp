@@ -1,58 +1,48 @@
 <?php
 
-# 引入框架入口文件
-require 'system/Entrance.php';
+define('START_TIME', microtime());
 
-# 引入数据库配置文件
-require 'app/config/db_config.php';
+require 'system/Roc.php';
 
-# 引入路由规则配置文件
-require 'app/config/router_config.php';
+Roc::set([
+    'system.handle_errors' => true,
 
-# 实例化ROC框架，动态调用
-$app = ROC::app();
+    'system.controllers.path' => 'app/controllers',
 
-# 路由分发（注册规则）
-foreach ($router_config as $path => $rule)
-{   
-    $app->route($path, $rule);
-}
+    'system.models.path' => 'app/models',
 
-# 是否匹配到路由规则
-$isExistRule = true;
+    'system.views.path' => 'app/views',
 
-# 路由分发（实例化Class）
-foreach ($router_config as $path => $rule)
-{
-    $nowRoute = $app->getNowRoute();
+    'system.libs.path' => 'app/libs',
 
-    if (is_array($nowRoute) && $rule == $nowRoute)
-    {
-        # 清除之前注册的路由
-        $app->clearRoutes();
+    'system.router' => require 'app/config/router.php',
 
-        # 实例化Class
-        $class = '\app\controller\\'.$rule[0];
+    // 数据库主机地址
+    'db.host' => 'localhost',
 
-        $rule[0] = new $class($app, $db_config);
+    // 数据库端口
+    'db.port' => 3306,
 
-        # 只注册当前URL对应的路由
-        $app->route($path, $rule);
+    // 数据库用户名
+    'db.user' => 'root',
 
-        $isExistRule = true;
+    // 数据库密码
+    'db.pass' => '123123',
 
-        break;
-    }
+    // 数据库名称
+    'db.name' => 'test',
 
-    $isExistRule = false;
-}
+    // 数据库编码
+    'db.charset' => 'utf8'
+]);
 
-if (!$isExistRule)
-{
-    $app->clearRoutes();
-}
+Roc::path(Roc::get('system.controllers.path'));
 
-# 启动框架
-$app->start();
+Roc::path(Roc::get('system.models.path'));
 
-?>
+Roc::path(Roc::get('system.libs.path'));
+
+Roc::before('start', array('Controller', 'init'));
+
+Roc::start();
+

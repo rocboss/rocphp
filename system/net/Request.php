@@ -1,5 +1,4 @@
 <?php
-# 代表了一个HTTP请求。所有来自$_GET,$_POST,$_COOKIE,$_FILES中的数据都要通过Request类获取和访问。默认的Request属性就包括url,base,method,user_agent等。
 
 namespace system\net;
 
@@ -41,19 +40,13 @@ class Request
     
     public $proxy_ip;
     
-    public function __construct($config = array())
+    public function __construct($config = [])
     {
         if (empty($config))
         {
-            $config = array(
+            $config = [
                 'url' => self::getVar('REQUEST_URI', '/'),
-                'base' => str_replace(array(
-                    '\\',
-                    ' '
-                ), array(
-                    '/',
-                    '%20'
-                ), dirname(self::getVar('SCRIPT_NAME'))),
+                'base' => str_replace(['\\', ' '], ['/', '%20'], dirname(self::getVar('SCRIPT_NAME'))),
                 'method' => self::getMethod(),
                 'referrer' => self::getVar('HTTP_REFERER'),
                 'ip' => self::getVar('REMOTE_ADDR'),
@@ -69,13 +62,13 @@ class Request
                 'secure' => self::getVar('HTTPS', 'off') != 'off',
                 'accept' => self::getVar('HTTP_ACCEPT'),
                 'proxy_ip' => self::getProxyIpAddress()
-            );
+            ];
         }
         
         $this->init($config);
     }
     
-    public function init($properties = array())
+    public function init($properties = [])
     {
         foreach ($properties as $name => $value)
         {
@@ -149,7 +142,7 @@ class Request
     
     public static function getProxyIpAddress()
     {
-        static $forwarded = array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED');
+        static $forwarded = ['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED'];
         
         $flags = \FILTER_FLAG_NO_PRIV_RANGE | \FILTER_FLAG_NO_RES_RANGE;
         
@@ -175,7 +168,7 @@ class Request
     
     public static function parseQuery($url)
     {
-        $params = array();
+        $params = [];
         
         $args = parse_url($url);
         if (isset($args['query']))
@@ -186,4 +179,3 @@ class Request
         return $params;
     }
 }
-?>

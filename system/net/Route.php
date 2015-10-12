@@ -1,5 +1,4 @@
 <?php
-# 负责路由的具体实现。Router相当于对Route的包装。
 
 namespace system\net;
 
@@ -9,9 +8,9 @@ class Route
     
     public $callback;
     
-    public $methods = array();
+    public $methods = [];
     
-    public $params = array();
+    public $params = [];
     
     public $regex;
     
@@ -22,11 +21,8 @@ class Route
     public function __construct($pattern, $callback, $methods, $pass)
     {
         $this->pattern  = $pattern;
-        
         $this->callback = $callback;
-        
         $this->methods  = $methods;
-        
         $this->pass     = $pass;
     }
     
@@ -38,53 +34,44 @@ class Route
             {
                 $this->params[] = $this;
             }
-            
             return true;
         }
         
-        $ids       = array();
-        
+        $ids       = [];
         $last_char = substr($this->pattern, -1);
         
         if ($last_char === '*')
         {
             $n     = 0;
-            
             $len   = strlen($url);
-            
             $count = substr_count($this->pattern, '/');
             
             for ($i = 0; $i < $len; $i++)
             {
                 if ($url[$i] == '/')
-
                     $n++;
-                
                 if ($n == $count)
-                    
                     break;
             }
             
             $this->splat = (string) substr($url, $i + 1);
         }
         
-        $regex = str_replace(array(
+        $regex = str_replace([
             ')',
             '/*'
-        ), array(
+        ], [
             ')?',
             '(/?|/.*?)'
-        ), $this->pattern);
+        ], $this->pattern);
         
         $regex = preg_replace_callback('#@([\w]+)(:([^/\(\)]*))?#', function($matches) use (&$ids)
         {
             $ids[$matches[1]] = null;
-            
             if (isset($matches[3]))
             {
                 return '(?P<' . $matches[1] . '>' . $matches[3] . ')';
             }
-            
             return '(?P<' . $matches[1] . '>[^/\?]+)';
         }, $regex);
         
@@ -119,7 +106,6 @@ class Route
     
     public function matchMethod($method)
     {
-        return count(array_intersect(array($method, '*'), $this->methods)) > 0;
+        return count(array_intersect([$method, '*'], $this->methods)) > 0;
     }
 }
-?>
