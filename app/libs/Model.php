@@ -11,7 +11,7 @@ class Model
         return $this->_error;
     }
 
-    public function setDb(medoo $db)
+    public function setDb(DBEngine $db)
     {
         $this->_db = $db;
     }
