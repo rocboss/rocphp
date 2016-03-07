@@ -42,7 +42,7 @@ Roc::path(Roc::get('system.models.path'));
 
 Roc::path(Roc::get('system.libs.path'));
 
-Roc::before('start', array('Controller', 'init'));
+Roc::before('start', ['Controller', 'init']);
 
 Roc::start();
 
