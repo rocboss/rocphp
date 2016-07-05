@@ -22,7 +22,7 @@ class DBEngine
     protected $class;
     
     protected static $db_types = array('pdo', 'mysqli', 'mysql', 'pgsql', 'sqlite', 'sqlite3');
-    protected static $cache_types = array('memcached', 'memcache', 'xcache');
+    protected static $cache_types = array('memcached', 'memcache', 'xcache', 'redis');
     
     public $last_query;
     public $num_rows;
@@ -1025,6 +1025,10 @@ class DBEngine
                 $this->cache->set($key, $value, 0, $expire);
                 break;
             
+            case 'redis':
+                $this->cache->setex($key, $expire, is_array($value) ? json_encode($value) : $value);
+                break;
+
             case 'apc':
                 apc_store($key, $value, $expire);
                 break;
@@ -1062,6 +1066,11 @@ class DBEngine
                 $value           = $this->cache->get($key);
                 $this->is_cached = ($value !== false);
                 return $value;
+
+            case 'redis':
+                $value           = $this->cache->get($key);
+                $this->is_cached = ($value !== false);
+                return preg_match('/[^,:{}\\[\\]0-9.\-+Eaeflnr-u \n\r\t]/', $value) || $value == '[]' ? json_decode($value, true) : $value;
             
             case 'apc':
                 return apc_fetch($key, $this->is_cached);
@@ -1088,7 +1097,7 @@ class DBEngine
                 break;
             
             default:
-                return $this->cache[$key];
+                return isset($this->cache[$key]) ? $this->cache[$key] : NULL;
         }
         return null;
     }
@@ -1103,6 +1112,9 @@ class DBEngine
                 return $this->cache->delete($key);
             
             case 'memcache':
+                return $this->cache->delete($key);
+
+            case 'redis':
                 return $this->cache->delete($key);
             
             case 'apc':
@@ -1139,6 +1151,10 @@ class DBEngine
             
             case 'memcache':
                 $this->cache->flush();
+                break;
+
+            case 'redis':
+                $this->cache->flushDB();
                 break;
             
             case 'apc':

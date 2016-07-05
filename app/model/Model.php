@@ -3,7 +3,6 @@
 class Model
 {
     protected $_error;
-
     protected $_db;
 
     public function getError()
@@ -16,4 +15,3 @@ class Model
         $this->_db = $db;
     }
 }
-
