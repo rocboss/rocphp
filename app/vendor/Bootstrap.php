@@ -76,22 +76,22 @@ class Bootstrap
     /**
      * Get model
      * @method getModel
-     * @param  [type]   $name   [description]
-     * @param  [Bool]   $initDb [description]
+     * @param  [string]   $name   [description]
+     * @param  [string]   $dbName [description]
      * @return [type]           [description]
      */
-    public static function getModel($name = null, $initDb = true)
+    public static function getModel($name = null, $dbName = 'master')
     {
         if (is_null($name)) {
-            return self::getMysqlDb();
+            return self::getMysqlDb($dbName);
         }
 
         $class = '\\' . trim(str_replace('/', '\\', ucfirst($name)), '\\') . 'Model';
         if (!isset(self::$_modelInstances[$class])) {
             $instance = new $class();
 
-            if ($initDb) {
-                $instance->setDb(self::getMysqlDb());
+            if (!empty($dbName)) {
+                $instance->setDb(self::getMysqlDb($dbName));
             }
 
             self::$_modelInstances[$class] = $instance;
@@ -153,15 +153,15 @@ class Bootstrap
      * @param  string $name [description]
      * @return [type]       [description]
      */
-    public static function getMysqlDb($name = 'master.db')
+    public static function getMysqlDb($name = 'master')
     {
         if (!isset(self::$_dbInstances[$name])) {
-            $db_host = Roc::get($name.'.host');
-            $db_port = Roc::get($name.'.port');
-            $db_user = Roc::get($name.'.user');
-            $db_pass = Roc::get($name.'.pass');
-            $db_name = Roc::get($name.'.name');
-            $db_charset = Roc::get($name.'.charset');
+            $db_host = Roc::get($name.'.db.host');
+            $db_port = Roc::get($name.'.db.port');
+            $db_user = Roc::get($name.'.db.user');
+            $db_pass = Roc::get($name.'.db.pass');
+            $db_name = Roc::get($name.'.db.name');
+            $db_charset = Roc::get($name.'.db.charset');
 
             try {
                 $pdo = new \PDO('mysql:host='.$db_host.';dbname='.$db_name.';port='.$db_port, $db_user, $db_pass);
@@ -175,7 +175,7 @@ class Bootstrap
             } catch (Exception $e) {
                 echo json_encode([
                     'code' => 500,
-                    'msg' => 'Fail To Connect MySQL Server.',
+                    'msg' => 'Fail To Connect ['.$name.'] MySQL Server.',
                     'data'=> $e->getMessage()
                 ], JSON_UNESCAPED_UNICODE);
                 exit;
