@@ -1,26 +1,16 @@
 <?php
+
 namespace system\template;
 
-/**
- * The View class represents output to be displayed. It provides
- * methods for managing view data and inserts the data into
- * view templates upon rendering.
- */
+use \Roc;
+
 class View
 {
-    /**
-     * Location of view templates.
+    /* Location of view templates.
      *
      * @var string
      */
     public $path;
-
-    /**
-     * File extension.
-     *
-     * @var string
-     */
-    public $extension = '.php';
 
     /**
      * View variables.
@@ -36,11 +26,50 @@ class View
      */
     private $template;
 
-    /**
-     * Constructor.
-     *
-     * @param string $path Path to templates directory
-     */
+    private $systemReplace = [
+        '~\{(\$[a-z0-9_]+)\}~i' => '<?php echo $1 ?>',
+        // {$name}
+
+        '~\{(\$[a-z0-9_]+)\.([a-z0-9_]+)\}~i' => '<?php echo $1[\'$2\'] ?>',
+        // {$arr.key}
+
+        '~\{(\$[a-z0-9_]+)\.([a-z0-9_]+)\.([a-z0-9_]+)\}~i' => '<?php echo $1[\'$2\'][\'$3\'] ?>',
+        // {$arr.key.key2}
+
+        '~\{(include_once|require_once|include|require)\s*\(\s*(.+?)\s*\)\s*\s*\}~i' => '<?php include \$this->_include($2, __FILE__) ?>',
+        // {include('inc/top.php')}
+
+        '~\{:(.+?)\}~' => '<?php echo $1 ?>',
+        // {:strip_tags($a)}
+
+        '~\{\~(.+?)\}~' => '<?php $1 ?>',
+        // {~var_dump($a)}
+
+        '~<\?=\s*~' => '<?php echo ',
+        // <?=
+
+        '~\{loop\s+(\S+)\s+(\S+)\}~' => '<?php if(is_array(\\1)) foreach(\\1 as \\2) { ?>',
+        // {loop $array $vaule}
+
+        '~\{loop\s+(\S+)\s+(\S+)\s+(\S+)\}~' => '<?php if(is_array(\\1)) foreach (\\1 as \\2 => \\3) { ?>',
+        // {loop $array $key $value}
+
+        '~\{\/loop\}~' => '<?php } ?>',
+        // {/loop}
+
+        '~\{if\s+(.+?)\}~' => '<?php if (\\1) { ?>',
+        // {if condition}
+
+        '~\{elseif\s+(.+?)\}~' => '<?php }elseif(\\1){ ?>',
+        // {elseif condition}
+
+        '~\{else\}~' => '<?php }else{ ?>',
+        // {else}
+
+        '~\{\/if\}~' => '<?php } ?>',
+        // {/if}
+    ];
+
     public function __construct($path = '.')
     {
         $this->path = $path;
@@ -120,7 +149,30 @@ class View
 
         extract($this->vars);
 
-        include $this->template;
+        $tmpPath = Roc::get('system.views.cache').'/'.str_replace('/', '_', $this->template);
+
+        if (!$this->isCached($tmpPath)) {
+            $tpl = preg_replace(array_keys($this->systemReplace), $this->systemReplace, @file_get_contents($this->template));
+
+            @file_put_contents($tmpPath, $tpl, LOCK_EX);
+        }
+
+        include $tmpPath;
+    }
+
+    public function clean()
+    {
+        $dir = Roc::get('system.views.cache');
+
+        $cacheDir = opendir($dir);
+
+        while ($file = @readdir($cacheDir)) {
+            if ($file != "." && $file != "..") {
+                unlink($dir . '/' . $file);
+            }
+        }
+
+        closedir($cacheDir);
     }
 
     /**
@@ -135,6 +187,7 @@ class View
         ob_start();
 
         $this->render($file, $data);
+
         $output = ob_get_clean();
 
         return $output;
@@ -159,17 +212,33 @@ class View
      */
     public function getTemplate($file)
     {
-        $ext = $this->extension;
-
-        if (!empty($ext) && (substr($file, -1 * strlen($ext)) != $ext)) {
-            $file .= $ext;
+        if ((substr($file, -4) != '.php')) {
+            $file .= '.php';
         }
-
         if ((substr($file, 0, 1) == '/')) {
             return $file;
+        } else {
+            return $this->path . '/' . $file;
+        }
+    }
+
+    public function isCached($path)
+    {
+        if (!file_exists($path)) {
+            return false;
         }
 
-        return $this->path.'/'.$file;
+        $cacheTime = Roc::get('system.views.cacheTime');
+
+        if ($cacheTime < 0) {
+            return true;
+        }
+
+        if (time() - filemtime($path) > $cacheTime) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
