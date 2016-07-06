@@ -222,7 +222,7 @@ class Bootstrap
             echo json_encode([
                 'code' => 500,
                 'msg' => 'Redis server connection failed',
-                'data' => $e->getMessage()
+                'data' => ''
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }
