@@ -1,7 +1,8 @@
-# The document is being perfected.(to be continued)
 
-----------
+##  The project has ceased to be maintained
+I recommand you to use RESTful API to build an APP.
 
+[Go to Batio > ](https://github.com/rocboss/batio)
 
 # What is ROCPHP?
 
